@@ -100,6 +100,48 @@
         </div>
         <canvas id="video-canvas"></canvas>
     </div>
+    <div id="ctaButtonDiv" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100;">
+        <a id="ctaButton" href="https://www.instagram.com" target="_blank" class="button-style">Visítanos en Instagram</a>
+    </div>
+    
+    <script>
+        function ShowCTAButton() {
+            document.getElementById("ctaButtonDiv").style.display = "block";
+        }
+    
+        async function StartWebcam(){
+            console.log("StartWebcam")
+    
+            while (window.requestingForCameraPermission) {
+                console.log("Waiting for permissions...");
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+    
+            console.log("Got Permissions");
+    
+            if(window.webcamStream) {
+                const video = document.querySelector("#webcam-video");
+                video.srcObject = webcamStream;
+                try {
+                    await arCamera.startWebcam(video);
+                    console.log("Webcam started successfully");
+                    
+                    window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
+    
+                    // Mostrar el botón CTA cuando la cámara se haya activado
+                    ShowCTAButton();
+                }
+                catch(err){
+                    console.error("Webcam failed to start - ", err);
+                    window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+                }   
+            }
+            else {
+                console.error("Webcam failed to start - permission not yet granted");
+                window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+            }  
+        }
+    </script>
     <script src="arcamera.js" type="text/javascript"></script>
     <script src="wtracker.js" type="text/javascript"></script>
     <script src="Build/ORIGENES V5.loader.js"></script>
